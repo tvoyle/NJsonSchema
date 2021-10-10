@@ -75,8 +75,12 @@ namespace NJsonSchema.CodeGeneration.CSharp
                 isNullable = true;
             }
 
-            var markAsNullableType = Settings.GenerateNullableReferenceTypes && isNullable;
+            if (schema.IsUnionType && !schema.HasTypeNameTitle)
+            {
+                return ResolveAnonymousOneOf(schema, typeNameHint, isNullable);
+            }
 
+            var markAsNullableType = Settings.GenerateNullableReferenceTypes && isNullable;    
             if (schema.ActualTypeSchema.IsAnyType &&
                 schema.ActualDiscriminator == null &&
                 schema.InheritedSchema == null && // not in inheritance hierarchy
@@ -281,5 +285,11 @@ namespace NJsonSchema.CodeGeneration.CSharp
             var keyType = ResolveDictionaryKeyType(schema, "string");
             return string.Format(Settings.DictionaryType + "<{0}, {1}>", keyType, valueType);
         }
+
+        private string ResolveAnonymousOneOf(JsonSchema schema, string typeNameHint, bool isNullable)
+        {
+            var underlyings = schema.OneOf.Select((t, i) => Resolve(t, t.IsNullable(Settings.SchemaType), $"{typeNameHint}Case{i+1}")).ToList();
+            return $"OneOf<{string.Join(", ", underlyings)}>";
     }
+}
 }

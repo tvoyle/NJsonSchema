@@ -16,6 +16,8 @@ namespace NJsonSchema.CodeGeneration.CSharp
         /// <returns>The new name.</returns>
         public virtual string Generate(JsonSchemaProperty property)
         {
+            if (property.ExtensionData != null && property.ExtensionData.ContainsKey("name"))
+                return (string) property.ExtensionData["name"];
             return ConversionUtilities.ConvertToUpperCamelCase(property.Name
                     .Replace("\"", string.Empty)
                     .Replace("@", string.Empty)

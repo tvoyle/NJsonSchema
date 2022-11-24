@@ -33,16 +33,40 @@ namespace NJsonSchema.Generation
                 ContractResolver = new SystemTextJsonContractResolver(serializerOptions)
             };
 
-            if (((IEnumerable)serializerOptions.Converters).OfType<object>().Any(c =>
-                c.GetType().IsAssignableToTypeName("System.Text.Json.Serialization.JsonStringEnumConverter", TypeNameStyle.FullName)))
+            var jsonStringEnumConverter = ((IEnumerable) serializerOptions.Converters).OfType<object>()
+                .FirstOrDefault(c => c
+                    .GetType().IsAssignableToTypeName("System.Text.Json.Serialization.JsonStringEnumConverter", TypeNameStyle.FullName));
+
+            if (jsonStringEnumConverter == null)
             {
-                settings.Converters.Add(new StringEnumConverter());
+                return settings;
             }
+
+            var camelCasePolicy = IsCamelCaseEnumNamingPolicy(jsonStringEnumConverter);
+            settings.Converters.Add(new StringEnumConverter(camelCasePolicy));
 
             return settings;
         }
 
-        internal class SystemTextJsonContractResolver : DefaultContractResolver
+        private static bool IsCamelCaseEnumNamingPolicy(object jsonStringEnumConverter)
+        {
+            try
+            {
+                var enumNamingPolicy = jsonStringEnumConverter
+                    .GetType().GetRuntimeFields()
+                    .FirstOrDefault(x => x.FieldType.FullName == "System.Text.Json.JsonNamingPolicy")
+                    ?.GetValue(jsonStringEnumConverter);
+
+                return enumNamingPolicy != null && 
+                    enumNamingPolicy.GetType().FullName == "System.Text.Json.JsonCamelCaseNamingPolicy";
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private sealed class SystemTextJsonContractResolver : DefaultContractResolver
         {
             private readonly dynamic _serializerOptions;
 
@@ -56,9 +80,19 @@ namespace NJsonSchema.Generation
                 var attributes = member.GetCustomAttributes(true);
 
                 var property = base.CreateProperty(member, memberSerialization);
-                property.Ignored = 
-                    attributes.FirstAssignableToTypeNameOrDefault("System.Text.Json.Serialization.JsonIgnoreAttribute", TypeNameStyle.FullName) != null ||
-                    attributes.FirstAssignableToTypeNameOrDefault("System.Text.Json.Serialization.JsonExtensionDataAttribute", TypeNameStyle.FullName) != null;
+
+                var propertyIgnored = false;
+                var jsonIgnoreAttribute = attributes.FirstAssignableToTypeNameOrDefault("System.Text.Json.Serialization.JsonIgnoreAttribute", TypeNameStyle.FullName);
+                if (jsonIgnoreAttribute != null)
+                {
+                    var condition = jsonIgnoreAttribute.TryGetPropertyValue<object>("Condition");
+                    if (condition is null || condition.ToString() == "Always")
+                    {
+                        propertyIgnored = true;
+                    }
+                }
+
+                property.Ignored = propertyIgnored || attributes.FirstAssignableToTypeNameOrDefault("System.Text.Json.Serialization.JsonExtensionDataAttribute", TypeNameStyle.FullName) != null;
 
                 if (_serializerOptions.PropertyNamingPolicy != null)
                 {
@@ -67,7 +101,7 @@ namespace NJsonSchema.Generation
 
                 dynamic jsonPropertyNameAttribute = attributes
                     .FirstAssignableToTypeNameOrDefault("System.Text.Json.Serialization.JsonPropertyNameAttribute", TypeNameStyle.FullName);
-                
+
                 if (jsonPropertyNameAttribute != null && !string.IsNullOrEmpty(jsonPropertyNameAttribute.Name))
                 {
                     property.PropertyName = jsonPropertyNameAttribute.Name;

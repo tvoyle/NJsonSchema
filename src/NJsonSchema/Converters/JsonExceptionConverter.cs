@@ -158,14 +158,16 @@ namespace NJsonSchema.Converters
                 }
                 else
                 {
-                    field = GetField(objectType, "m_" + property.Value.Substring(0, 1).ToLowerInvariant() + property.Value.Substring(1));
+                    var fieldNameSuffix = property.Value.Substring(0, 1).ToLowerInvariant() + property.Value.Substring(1);
+
+                    field = GetField(objectType, "m_" + fieldNameSuffix);
                     if (field != null)
                     {
                         field.SetValue(value, propertyValue);
                     }
                     else
                     {
-                        field = GetField(objectType, "_" + property.Value.Substring(0, 1).ToLowerInvariant() + property.Value.Substring(1));
+                        field = GetField(objectType, "_" + fieldNameSuffix);
                         if (field != null)
                         {
                             field.SetValue(value, propertyValue);
@@ -184,10 +186,11 @@ namespace NJsonSchema.Converters
 
         private FieldInfo GetField(Type type, string fieldName)
         {
-            var field = type.GetTypeInfo().GetDeclaredField(fieldName);
-            if (field == null && type.GetTypeInfo().BaseType != null)
+            var typeInfo = type.GetTypeInfo();
+            var field = typeInfo.GetDeclaredField(fieldName);
+            if (field == null && typeInfo.BaseType != null)
             {
-                return GetField(type.GetTypeInfo().BaseType, fieldName);
+                return GetField(typeInfo.BaseType, fieldName);
             }
 
             return field;

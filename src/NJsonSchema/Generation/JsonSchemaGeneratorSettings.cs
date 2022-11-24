@@ -9,8 +9,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using System.Reflection;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -22,10 +22,8 @@ using Namotion.Reflection;
 namespace NJsonSchema.Generation
 {
     /// <summary>The JSON Schema generator settings.</summary>
-    public class JsonSchemaGeneratorSettings
+    public class JsonSchemaGeneratorSettings : IXmlDocsSettings
     {
-        private Dictionary<string, JsonContract> _cachedContracts = new Dictionary<string, JsonContract>();
-
         private EnumHandling _defaultEnumHandling;
         private PropertyNameHandling _defaultPropertyNameHandling;
 
@@ -54,6 +52,10 @@ namespace NJsonSchema.Generation
             ReflectionService = new DefaultReflectionService();
 
             ExcludedTypeNames = new string[0];
+
+            UseXmlDocumentation = true;
+            ResolveExternalXmlDocumentation = true;
+            XmlDocumentationFormatting = XmlDocsFormattingMode.None;
         }
 
         /// <summary>Gets or sets the default reference type null handling when no nullability information is available (default: Null).</summary>
@@ -80,7 +82,7 @@ namespace NJsonSchema.Generation
         /// <summary>Gets or sets a value indicating whether to ignore properties with the <see cref="ObsoleteAttribute"/>.</summary>
         public bool IgnoreObsoleteProperties { get; set; }
 
-        /// <summary>Gets or sets a value indicating whether to use $ref references even if additional properties are 
+        /// <summary>Gets or sets a value indicating whether to use $ref references even if additional properties are
         /// defined on the object (otherwise allOf/oneOf with $ref is used, default: false).</summary>
         public bool AllowReferencesWithProperties { get; set; }
 
@@ -90,7 +92,7 @@ namespace NJsonSchema.Generation
         /// <summary>Will set `additionalProperties` on all added <see cref="JsonSchema">schema definitions and references</see>(default: false).</summary>
         public bool AlwaysAllowAdditionalObjectProperties { get; set; }
 
-        /// <summary>Gets or sets a value indicating whether to generate the example property of the schemas based on the &lt;example&gt; xml docs entry as JSON.</summary>
+        /// <summary>Gets or sets a value indicating whether to generate the example property of the schemas based on the &lt;example&gt; xml docs entry as JSON (requires <see cref="UseXmlDocumentation"/> to be true, default: true).</summary>
         public bool GenerateExamples { get; set; }
 
         /// <summary>Gets or sets the schema type to generate (default: JsonSchema).</summary>
@@ -122,6 +124,15 @@ namespace NJsonSchema.Generation
 
         /// <summary>Gets or sets the excluded type names (same as <see cref="JsonSchemaIgnoreAttribute"/>).</summary>
         public string[] ExcludedTypeNames { get; set; }
+
+        /// <summary>Gets or sets a value indicating whether to read XML Docs (default: true).</summary>
+        public bool UseXmlDocumentation { get; set; }
+
+        /// <summary>Gets or sets a value indicating whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory (default: true).</summary>
+        public bool ResolveExternalXmlDocumentation { get; set; }
+
+        /// <summary>Gets or sets the XML Docs formatting (default: None).</summary>
+        public XmlDocsFormattingMode XmlDocumentationFormatting { get; set; }
 
         /// <summary>Gets or sets the type name generator.</summary>
         [JsonIgnore]
@@ -203,20 +214,11 @@ namespace NJsonSchema.Generation
                 return null;
             }
 
-            if (!_cachedContracts.ContainsKey(key))
-            {
-                lock (_cachedContracts)
-                {
-                    if (!_cachedContracts.ContainsKey(key))
-                    {
-                        _cachedContracts[key] = !type.GetTypeInfo().IsGenericTypeDefinition ?
-                            ActualContractResolver.ResolveContract(type) :
-                            null;
-                    }
-                }
-            }
+            var contract = !type.GetTypeInfo().IsGenericTypeDefinition
+                ? ActualContractResolver.ResolveContract(type)
+                : null;
 
-            return _cachedContracts[key];
+            return contract;
         }
 
         /// <summary>Gets the actual computed <see cref="GenerateAbstractSchemas"/> setting based on the global setting and the JsonSchemaAbstractAttribute attribute.</summary>
@@ -243,8 +245,6 @@ namespace NJsonSchema.Generation
 
         private void UpdateActualContractResolverAndSerializerSettings()
         {
-            _cachedContracts = new Dictionary<string, JsonContract>();
-
             if (SerializerOptions != null)
             {
                 if (DefaultPropertyNameHandling != PropertyNameHandling.Default)

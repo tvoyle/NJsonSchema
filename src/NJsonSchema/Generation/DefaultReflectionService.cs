@@ -139,15 +139,17 @@ namespace NJsonSchema.Generation
             if (type == typeof(TimeSpan) ||
                 type.FullName == "NodaTime.Duration")
             {
-                return JsonTypeDescription.Create(contextualType, JsonObjectType.String, false, JsonFormatStrings.TimeSpan);
+                return JsonTypeDescription.Create(contextualType, JsonObjectType.String, false, JsonFormatStrings.Duration);
             }
 
-            if (type.FullName == "NodaTime.LocalDate")
+            if (type.FullName == "NodaTime.LocalDate" ||
+                type.FullName == "System.DateOnly")
             {
                 return JsonTypeDescription.Create(contextualType, JsonObjectType.String, false, JsonFormatStrings.Date);
             }
 
-            if (type.FullName == "NodaTime.LocalTime")
+            if (type.FullName == "NodaTime.LocalTime" ||
+                type.FullName == "System.TimeOnly")
             {
                 return JsonTypeDescription.Create(contextualType, JsonObjectType.String, false, JsonFormatStrings.Time);
             }
@@ -176,6 +178,7 @@ namespace NJsonSchema.Generation
 
             if (type.IsAssignableToTypeName(nameof(JToken), TypeNameStyle.Name) ||
                 type.FullName == "System.Dynamic.ExpandoObject" ||
+                type.FullName == "System.Text.Json.JsonElement" ||
                 type == typeof(object))
             {
                 return JsonTypeDescription.Create(contextualType, JsonObjectType.None, isNullable, null);
@@ -339,7 +342,7 @@ namespace NJsonSchema.Generation
 #else
 
         /// <summary>Checks whether the given type is an array type.</summary>
-        /// <param name="type">The type.</param>
+        /// <param name="contextualType">The type.</param>
         /// <returns>true or false.</returns>
         protected virtual bool IsArrayType(ContextualType contextualType)
         {
@@ -354,7 +357,7 @@ namespace NJsonSchema.Generation
                 return true;
             }
 
-            return contextualType.Type.IsArray || 
+            return contextualType.Type.IsArray ||
                 (contextualType.Type.GetInterfaces().Contains(typeof(IEnumerable)) &&
                 (contextualType.TypeInfo.BaseType == null ||
                     !contextualType.TypeInfo.BaseType.GetTypeInfo().GetInterfaces().Contains(typeof(IEnumerable))));
@@ -383,8 +386,11 @@ namespace NJsonSchema.Generation
             if (jsonConverterAttribute != null && ObjectExtensions.HasProperty(jsonConverterAttribute, "ConverterType"))
             {
                 var converterType = (Type)jsonConverterAttribute.ConverterType;
-                return converterType.IsAssignableToTypeName("StringEnumConverter", TypeNameStyle.Name) ||
-                       converterType.IsAssignableToTypeName("System.Text.Json.Serialization.JsonStringEnumConverter", TypeNameStyle.FullName);
+                if (converterType != null)
+                {
+                    return converterType.IsAssignableToTypeName("StringEnumConverter", TypeNameStyle.Name) ||
+                           converterType.IsAssignableToTypeName("System.Text.Json.Serialization.JsonStringEnumConverter", TypeNameStyle.FullName);
+                }
             }
 
             return false;

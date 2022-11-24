@@ -8,9 +8,7 @@
 
 using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Namotion.Reflection;
-using Newtonsoft.Json;
 using NJsonSchema.Annotations;
 
 namespace NJsonSchema.Generation
@@ -25,7 +23,7 @@ namespace NJsonSchema.Generation
         {
             var cachedType = type.ToCachedType();
 
-            var jsonSchemaAttribute = cachedType.GetTypeAttribute<JsonSchemaAttribute>();
+            var jsonSchemaAttribute = cachedType.GetInheritedAttribute<JsonSchemaAttribute>();
             if (!string.IsNullOrEmpty(jsonSchemaAttribute?.Name))
             {
                 return jsonSchemaAttribute.Name;
@@ -39,9 +37,9 @@ namespace NJsonSchema.Generation
             if (nType.Type.IsGenericType)
 #endif
             {
-                return GetName(nType).Split('`').First() + "Of" + 
+                return GetName(nType).Split('`').First() + "Of" +
                        string.Join("And", nType.GenericArguments
-                                               .Select(a => Generate(a.OriginalType)));
+                           .Select(a => Generate(a.OriginalType)));
             }
 
             return GetName(nType);

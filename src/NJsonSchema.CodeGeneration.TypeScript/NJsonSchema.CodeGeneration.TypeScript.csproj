@@ -1,21 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;netstandard2.0;net451</TargetFrameworks>
-    <Description>JSON Schema reader, generator and validator for .NET</Description>
-    <Version>10.4.1-oneof.2</Version>
-    <PackageTags>json schema validation generator .net</PackageTags>
-    <Copyright>Copyright © Rico Suter, 2020</Copyright>
-    <PackageProjectUrl>http://NJsonSchema.org</PackageProjectUrl>
-    <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>../NJsonSchema.snk</AssemblyOriginatorKeyFile>
-    <PackageIconUrl />
-    <Authors>Rico Suter</Authors>
-    <PackageIcon>NuGetIcon.png</PackageIcon>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Company />
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
@@ -31,9 +16,9 @@
     <EmbeddedResource Include="Templates\Interface.liquid" />
     <EmbeddedResource Include="Templates\KnockoutClass.liquid" />
     <EmbeddedResource Include="Templates\File.ReferenceHandling.liquid" />
+    <EmbeddedResource Include="Templates\File.ParseDateOnly.liquid" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
   <ItemGroup>
@@ -45,5 +30,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="NuGetIcon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\NJsonSchema\Infrastructure\EnumExtensions.cs">
+      <Link>EnumExtensions.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>

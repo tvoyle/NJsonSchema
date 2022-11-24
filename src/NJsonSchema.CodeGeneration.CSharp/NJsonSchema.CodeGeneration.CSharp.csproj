@@ -1,99 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;netstandard2.0;net451</TargetFrameworks>
-    <Description>JSON Schema reader, generator and validator for .NET</Description>
-    <Version>10.4.1-oneof.2</Version>
-    <PackageTags>json schema validation generator .net</PackageTags>
-    <Copyright>Copyright © Rico Suter, 2020</Copyright>
-    <PackageProjectUrl>http://NJsonSchema.org</PackageProjectUrl>
-    <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>../NJsonSchema.snk</AssemblyOriginatorKeyFile>
-    <Authors>Rico Suter</Authors>
-    <PackageIcon>NuGetIcon.png</PackageIcon>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Company />
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.3|AnyCPU'">
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-  </PropertyGroup>
   <ItemGroup>
     <None Remove="Templates\Class.Body.liquid" />
     <None Remove="Templates\Class.Constructor.Record.liquid" />
-    <None Remove="Templates\OneOfAnonymous.liquid" />
-    <None Remove="Templates\OneOfBase.liquid" />
-    <None Remove="Templates\OneOfConverter.liquid" />
-    <None Remove="Templates\OneOfNamed.liquid" />
+
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Templates\OneOfConverter.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\OneOfNamed.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\OneOfAnonymous.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\OneOfBase.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\Class.Annotations.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\Class.Body.liquid" />
-    <EmbeddedResource Include="Templates\Class.Constructor.liquid" />
-    <EmbeddedResource Include="Templates\Class.Constructor.Record.liquid" />
-    <EmbeddedResource Include="Templates\Class.FromJson.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\Class.Inheritance.liquid" />
-    <EmbeddedResource Include="Templates\Class.Inpc.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\Class.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\Class.Property.Annotations.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\Class.ToJson.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\DateFormatConverter.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\Enum.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\File.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\JsonInheritanceAttribute.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Templates\JsonInheritanceConverter.liquid">
-      <CustomToolNamespace>
-      </CustomToolNamespace>
-    </EmbeddedResource>
+    <EmbeddedResource Include="Templates\*.liquid" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
@@ -104,12 +22,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="NJsonSchema.CodeGeneration.CSharp.nuspec">
-      <Generator>
-      </Generator>
     </None>
     <None Update="NJsonSchema.snk">
-      <Generator>
-      </Generator>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -117,5 +31,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="NuGetIcon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\NJsonSchema\Infrastructure\EnumExtensions.cs">
+      <Link>EnumExtensions.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>

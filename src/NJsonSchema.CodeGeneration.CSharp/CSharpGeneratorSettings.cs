@@ -124,7 +124,7 @@ namespace NJsonSchema.CodeGeneration.CSharp
         /// <summary>Gets or sets the name of a static method which is called to transform the JsonSerializerSettings (for Newtonsoft.Json) or the JsonSerializerOptions (for System.Text.Json) used in the generated ToJson()/FromJson() methods (default: null).</summary>
         public string JsonSerializerSettingsTransformationMethod { get; set; }
 
-        /// <summary>Gets or sets a value indicating whether to render ToJson() and FromJson() methods (default: true).</summary>
+        /// <summary>Gets or sets a value indicating whether to render ToJson() and FromJson() methods (default: false).</summary>
         public bool GenerateJsonMethods { get; set; }
 
         /// <summary>Gets or sets a value indicating whether enums should be always generated as bit flags (default: false).</summary>
@@ -144,5 +144,8 @@ namespace NJsonSchema.CodeGeneration.CSharp
 
         /// <summary>Gets or sets a value indicating whether to generate Nullable Reference Type annotations (default: false).</summary>
         public bool GenerateNullableReferenceTypes { get; set; }
+
+        /// <summary>Generate C# 9.0 record types instead of record-like classes.</summary>
+        public bool GenerateNativeRecords { get; set; }
     }
 }
